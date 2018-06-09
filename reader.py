@@ -1,100 +1,41 @@
-from PyPDF2 import PdfFileWriter, PdfFileReader
+import PyPDF2
 
-output = PdfFileWriter()
-input1 = PdfFileReader(open("dst.pdf", "rb"))
 
-page_text = input1.getPage(24).extractText()
+input1 = PyPDF2.PdfFileReader(open("dst.pdf", "rb"))
+
 page = input1.getPage(24)
-
-hr_categories = {
-"Structural Movement": "",
-"Dampness, rot and infestation": "",
-"Chimney stacks": "",
-"Roofing including roof space": "",
-"Rainwater fittings": "",
-"Main walls": "",
-"Windows, external doors and joinery": "",
-"External decorations": "",
-"Conservatories / porches"
-"Communal areas": "",
-"Garages and permanent outbuildings": "",
-"Outside areas and boundaries"
-"Ceilings": "",
-"Internal walls": "",
-"Floors including sub-floors": "",
-"Internal joinery and kitchen fittings": "",
-"Chimney breasts and fireplaces": "",
-"Internal decorations": "",
-"Cellars": "",
-"Electricity": "",
-"Gas": "",
-"Water, plumbing and bathroom fittings": "",
-"Heating and hot water": "",
-"Drainage": ""
-}
-
-hr_titles = [
-"Structural Movement",
-"Dampness, rot and infestation",
-"Chimney stacks",
-"Roofing including roof space",
-"Rainwater fittings",
-"Main walls",
-"Windows, external doors and joinery",
-"External decorations",
-"Conservatories / porches"
-"Communal areas",
-"Garages and permanent outbuildings",
-"Outside areas and boundaries"
-"Ceilings",
-"Internal walls",
-"Floors including sub-floors",
-"Internal joinery and kitchen fittings",
-"Chimney breasts and fireplaces",
-"Internal decorations",
-"Cellars",
-"Electricity",
-"Gas",
-"Water, plumbing and bathroom fittings",
-"Heating and hot water",
-"Drainage"
-]
-
-#
-# for text in page_text:
-#     if text
-#
-# print(page_text)
+page_text = page.extractText()
 
 
-def get_data_array():
-    phrase = " \nStructural Movement"
+start = page_text.index("Structural Movement")
+end = page_text.index("Remember")
 
-    if phrase in page_text:
-        text_array = page_text.split("\n \n")
-        index = text_array.index(phrase)
-        final_text_array = text_array[index:]
-
-        remember = final_text_array.index(' \n  \nRemember')
-
-        # print(remember)
-        print(final_text_array)
-
-        super_final_array = final_text_array[:remember]
-
-        arr = []
-
-        for el in super_final_array:
-            print(el)
-            if el == "1" or el == "2" or el == "3" or el == "-" or el == "-":
-                arr.append(el)
-            # elif len(el) < 2:
-            #     arr.append(el)
+text = page_text[start:end]  # trim down what's needed
 
 
-        # print(arr)
-        # print(len(arr))
-        # print(len(hr_titles))
-        # print(list(zip(hr_titles, arr)))
+making_col_name = True
+lines = text.split("\n")
+data = []
+col_name = ""
 
-get_data_array()
+for l in lines:
+    l = l.strip()
+    if making_col_name:
+        if l:
+            col_name += l
+        else:
+            # end of name, should be a newline between name and the value
+            making_col_name = False
+    else:
+        if l:  # must be the value, since nothing else on 'non name lines'
+            try:
+                data.append((col_name, int(l)))
+            except (ValueError, TypeError):
+                data.append((col_name, "0"))
+            col_name = ""
+        else:  # empty line before next name
+            making_col_name = True
+
+
+for t in data:
+    print(t[0], t[1])
